@@ -1,48 +1,29 @@
 var path = require('path');
 var express = require('express');
-var app = express(); // the app returned by express() is a JavaScript Function. Not something we can pass to our sockets!
+var app = express();
 
-// app.listen() returns an http.Server object
-// http://expressjs.com/en/4x/api.html#app.listen
 var server = app.listen(1337, function () {
-    console.log('The server is listening on port 1337!');
+  console.log('The server is listening on port 1337!');
 });
 
-var socketio = require('socket.io'); 
-
-// creates a new connection server for web sockets and integrates
-// it into our HTTP server 
-// this needs to be below the server.on('request', app) so that our 
-// express app takes precedence over our socekt server for typical 
-// HTTP requests 
+var socketio = require('socket.io');
 var io = socketio(server);
 
-
-// // use socket server as an event emitter in order to listen for new connctions
-io.on('connection', function(socket){
+io.on('connection', function (socket) {
 
 
-  //receives the newly connected socket
-  //called for each browser that connects to our server
   console.log('A new client has connected')
   console.log('socket id: ', socket.id)
 
-  //event that runs anytime a socket disconnects
-  socket.on('disconnect', function(){
-    console.log('socket id ' + socket.id + ' has disconnected. : ('); 
+  socket.on('disconnect', function () {
+    console.log('socket id ' + socket.id + ' has disconnected. : (');
   })
 
-  // server is receiving draw data from the client here 
-  // so we want to broadcast that data to all other connected clients 
-  socket.on('imDrawing', function(start, end, color){
+  socket.on('imDrawing', function (start, end, color) {
     console.log('catching the draw event here')
 
-    // we need to emit an event all sockets except the socket that originally emitted the 
-    // the draw data to the server 
-    // broadcasting means sending a message to everyone else except for the 
-    // the socket that starts it 
-    socket.broadcast.emit('otherDraw', start, end, color); 
-  }); 
+    socket.broadcast.emit('otherDraw', start, end, color);
+  });
 
 
 })
@@ -84,7 +65,7 @@ ROOMS:
 app.use(express.static(path.join(__dirname, 'browser')));
 
 app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 
